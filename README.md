@@ -20,8 +20,10 @@ This code is  : Mostly harmless
 The script wont work if you do state:=state+1 syntaxis, it analyses the code for state:= and the 10:  notations.  
 Although it works fine, it be wise to verify your state machine code with notepads++ file compare.  
 
-No monkeys have been killed for this product.  
-Any monkey can use this code for free cc0  
-Monkey be warned you use this at your own risk.
-(remind that the opriginal code is still in your folder/coding cave)
+No monkeys (or cats) have been killed for this product.  
+Any monkey (or cat) can use this code for free cc0.  
+Monkey be warned that you use this at your own risk, (cats you dont know what risks mean).
+
+Dont worry to much as your opriginal code is still in your folder/coding cave.
+Be sure to test your code.
 
