@@ -15,6 +15,13 @@ In the location from where you saved the original txt 2 new files will be made.
 - **{yourfilename}_mapping.info.txt**, shows a mapping overview (as in the popup)
 
 ## Disclaimer :
-the script wont work if you do state:=state+1 syntaxis, its analyses the code for state:= and the 10:  notations.
-Although it works it be wise to verify your state machine code with notepads++ file compare.
-No monkeys have been killed for this product.
+This code is  : Mostly harmless 
+
+The script wont work if you do state:=state+1 syntaxis, it analyses the code for state:= and the 10:  notations.  
+Although it works fine, it be wise to verify your state machine code with notepads++ file compare.  
+
+No monkeys have been killed for this product.  
+Any monkey can use this code for free cc0  
+Monkey be warned you use this at your own risk.
+(remind that the opriginal code is still in your folder/coding cave)
+
