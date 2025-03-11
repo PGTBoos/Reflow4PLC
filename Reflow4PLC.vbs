@@ -1,5 +1,6 @@
 ' VBScript to renumber state machine states and state variable assignments with sequential, evenly spaced numbers
 ' Handles drag-and-drop functionality with customizable state variable name
+' Preserves state 0 if it exists in the state machine
 ' Outputs mapping information to a separate file
 ' Usage: Drag and drop a file onto this script
 
@@ -113,11 +114,29 @@ Next
 uniqueStates = stateMap.Keys
 SortAscending uniqueStates
 
-' Assign new state numbers in sequence
+' Check if state 0 exists and needs to be preserved
+hasStateZero = False
+For Each oldState In uniqueStates
+    If oldState = 0 Then
+        hasStateZero = True
+        Exit For
+    End If
+Next
+
+' Assign new state numbers in sequence while preserving state 0 if it exists
+stateIndex = 0 ' For tracking position in the sequence
 For i = 0 To UBound(uniqueStates)
     oldState = uniqueStates(i)
-    newState = (i + 1) * incrementValue
-    stateMap(oldState) = newState
+    
+    If oldState = 0 And hasStateZero Then
+        ' Preserve state 0
+        stateMap(oldState) = 0
+    Else
+        ' Increment stateIndex only for non-zero states
+        stateIndex = stateIndex + 1
+        newState = stateIndex * incrementValue
+        stateMap(oldState) = newState
+    End If
 Next
 
 ' Create mapping information text for both display and file
@@ -126,16 +145,26 @@ mappingInfo = mappingInfo & "=====================================" & vbCrLf & v
 mappingInfo = mappingInfo & "Source file: " & inputFilePath & vbCrLf
 mappingInfo = mappingInfo & "Date: " & Now & vbCrLf
 mappingInfo = mappingInfo & "State variable: " & stateVarName & vbCrLf & vbCrLf
-mappingInfo = mappingInfo & "Found " & stateMap.Count & " unique states." & vbCrLf & vbCrLf
-mappingInfo = mappingInfo & "State number mapping:" & vbCrLf
+mappingInfo = mappingInfo & "Found " & stateMap.Count & " unique states." & vbCrLf
+
+If hasStateZero Then
+    mappingInfo = mappingInfo & "State 0 was preserved as it's typically used as an initial state." & vbCrLf
+End If
+
+mappingInfo = mappingInfo & vbCrLf & "State number mapping:" & vbCrLf
 mappingInfo = mappingInfo & "--------------------" & vbCrLf
 For Each oldState In uniqueStates
     mappingInfo = mappingInfo & "Old: " & oldState & " -> New: " & stateMap(oldState) & vbCrLf
 Next
 
 ' Display summary for verification
-displayInfo = "Found " & stateMap.Count & " unique states using variable '" & stateVarName & "'." & vbCrLf & vbCrLf
-displayInfo = displayInfo & "State number mapping:" & vbCrLf
+displayInfo = "Found " & stateMap.Count & " unique states using variable '" & stateVarName & "'." & vbCrLf
+
+If hasStateZero Then
+    displayInfo = displayInfo & "State 0 will be preserved." & vbCrLf
+End If
+
+displayInfo = displayInfo & vbCrLf & "State number mapping:" & vbCrLf
 For Each oldState In uniqueStates
     displayInfo = displayInfo & "Old: " & oldState & " -> New: " & stateMap(oldState) & vbCrLf
 Next
@@ -168,19 +197,22 @@ SortDescending sortedOldStates
 For Each oldState In sortedOldStates
     newState = stateMap(oldState)
     
-    ' Replace state labels (e.g., "10:") with better boundary detection
-    Set stateRegex = New RegExp
-    stateRegex.Global = True
-    stateRegex.IgnoreCase = True
-    stateRegex.Pattern = "(^|\n)(\s*)(" & oldState & ")(\s*:)"
-    codeText = stateRegex.Replace(codeText, "$1$2" & newState & "$4")
-    
-    ' Replace state assignments (e.g., "stateVarName := 10") with better boundary detection
-    Set stateAssignRegex = New RegExp
-    stateAssignRegex.Global = True
-    stateAssignRegex.IgnoreCase = True
-    stateAssignRegex.Pattern = "(" & stateVarNameEscaped & "\s*:=\s*)(" & oldState & ")(\s*;|\s*$)"
-    codeText = stateAssignRegex.Replace(codeText, "$1" & newState & "$3")
+    ' Skip replacement if the state number hasn't changed
+    If oldState <> newState Then
+        ' Replace state labels (e.g., "10:") with better boundary detection
+        Set stateRegex = New RegExp
+        stateRegex.Global = True
+        stateRegex.IgnoreCase = True
+        stateRegex.Pattern = "(^|\n)(\s*)(" & oldState & ")(\s*:)"
+        codeText = stateRegex.Replace(codeText, "$1$2" & newState & "$4")
+        
+        ' Replace state assignments (e.g., "stateVarName := 10") with better boundary detection
+        Set stateAssignRegex = New RegExp
+        stateAssignRegex.Global = True
+        stateAssignRegex.IgnoreCase = True
+        stateAssignRegex.Pattern = "(" & stateVarNameEscaped & "\s*:=\s*)(" & oldState & ")(\s*;|\s*$)"
+        codeText = stateAssignRegex.Replace(codeText, "$1" & newState & "$3")
+    End If
 Next
 
 ' Write the updated code to the output file
