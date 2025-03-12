@@ -1,5 +1,5 @@
 ' VBScript to renumber state machine states and state variable assignments with sequential, evenly spaced numbers
-' Handles drag-and-drop functionality with customizable state variable name
+' Handles drag-and-drop functionality with customizable state variable name and step size
 ' Preserves state 0 if it exists in the state machine
 ' Outputs mapping information to a separate file
 ' Usage: Drag and drop a file onto this script
@@ -24,6 +24,25 @@ If stateVarName = "" Then
     stateVarName = "_state" ' Default value
 End If
 
+' Prompt for the step size
+stepSizeStr = InputBox("Enter the step size for state numbering:" & vbCrLf & _
+                     "(States will be numbered like 0, 10, 20, 30... if step size is 10)" & vbCrLf & vbCrLf & _
+                     "Leave blank or enter 10 to use the default step size.", _
+                     "Step Size", "10")
+
+' Validate and set the step size
+If stepSizeStr = "" Then
+    incrementValue = 10 ' Default value
+Else
+    On Error Resume Next
+    incrementValue = CInt(stepSizeStr)
+    If Err.Number <> 0 Or incrementValue <= 0 Then
+        MsgBox "Invalid step size. Using default value of 10.", vbExclamation, "Invalid Input"
+        incrementValue = 10
+    End If
+    On Error GoTo 0
+End If
+
 ' Create output file path by adding "_updated" before the extension
 Set fso = CreateObject("Scripting.FileSystemObject")
 inputFolder = fso.GetParentFolderName(inputFilePath)
@@ -41,9 +60,6 @@ End If
 
 outputFilePath = fso.BuildPath(inputFolder, outputFileName)
 mappingFilePath = fso.BuildPath(inputFolder, mappingFileName)
-
-' Increment value for renumbering (e.g., 10 for states like 10, 20, 30, etc.)
-incrementValue = 10
 
 ' Read the input file
 On Error Resume Next
@@ -144,7 +160,8 @@ mappingInfo = "State Machine Renumbering Mapping Information" & vbCrLf
 mappingInfo = mappingInfo & "=====================================" & vbCrLf & vbCrLf
 mappingInfo = mappingInfo & "Source file: " & inputFilePath & vbCrLf
 mappingInfo = mappingInfo & "Date: " & Now & vbCrLf
-mappingInfo = mappingInfo & "State variable: " & stateVarName & vbCrLf & vbCrLf
+mappingInfo = mappingInfo & "State variable: " & stateVarName & vbCrLf
+mappingInfo = mappingInfo & "Step size: " & incrementValue & vbCrLf & vbCrLf
 mappingInfo = mappingInfo & "Found " & stateMap.Count & " unique states." & vbCrLf
 
 If hasStateZero Then
@@ -159,6 +176,7 @@ Next
 
 ' Display summary for verification
 displayInfo = "Found " & stateMap.Count & " unique states using variable '" & stateVarName & "'." & vbCrLf
+displayInfo = displayInfo & "Using step size of " & incrementValue & "." & vbCrLf
 
 If hasStateZero Then
     displayInfo = displayInfo & "State 0 will be preserved." & vbCrLf
@@ -229,7 +247,8 @@ On Error GoTo 0
 MsgBox "State machine renumbering complete!" & vbCrLf & vbCrLf & _
        "Input file: " & inputFilePath & vbCrLf & _
        "Output file: " & outputFilePath & vbCrLf & _
-       "Mapping file: " & mappingFilePath, vbInformation, "Success"
+       "Mapping file: " & mappingFilePath & vbCrLf & _
+       "Step size used: " & incrementValue, vbInformation, "Success"
 
 ' Function to sort an array in descending order
 Sub SortDescending(arr)
