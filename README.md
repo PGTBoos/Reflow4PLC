@@ -1,6 +1,6 @@
 # Reflow4PLC
-Reflow analyses a Twincat structured text code, asks for the state var and renumbers the state machine in 10 step size.
-Or in a different step size say 25 or 100 etc. 
+Reflow analyses a Twincat structured text code, asks for the state var and renumbers the state machine in 10 step size.  
+Or in a different step size say 25 or 100 or 42 etc. 
 
 ## Usage 
 1) copy the structured code in a txt file.  
